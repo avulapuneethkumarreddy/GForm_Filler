@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
-from langchain_community.embeddings import HuggingFaceInstructEmbeddings
+# from langchain_community.embeddings import HuggingFaceInstructEmbeddings
+
+from langchain_huggingface import HuggingFaceEmbeddings
 
 from question_retrever import extract_questions_from_google_form  
 
@@ -48,7 +50,7 @@ def create_vector_store(docs):
     split_docs = splitter.split_documents(docs)
 
     print("Initializing local embedding model (downloading if this is the first time)...")
-    embeddings = HuggingFaceInstructEmbeddings(
+    embeddings = HuggingFaceEmbeddings(
         model_name="hkunlp/instructor-base" # A good, general-purpose model
     )
     
@@ -69,6 +71,13 @@ def generate_answers_rag_with_refresh(form_data, vector_store, top_k=3, context_
     """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
+    # Define the safety settings to allow your resume's content
+    safety_settings = {
+    "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+    "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+    "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+    "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+}
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": top_k})
     
     answered = []
@@ -111,7 +120,7 @@ Generate only the final answer (no explanation).
 """
         
         # Use the configured model to generate content
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt,safety_settings=safety_settings)
         
         answer_text = response.text.strip() if response and response.text else "No answer generated"
         q["answer"] = answer_text
@@ -139,12 +148,21 @@ def rag_pipeline_with_refresh(form_url, doc_paths, top_k=3, context_refresh_inte
     )
     return filled_form
 
+
+
+
+
 # -------------------------------
 # Example usage
 # -------------------------------
+
+
+
 # if __name__ == "__main__":
 #     FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScP8ZvKzWqo496iHhBYp99ygcSEGADD4LOJAaXjspkYvfRBnw/viewform?usp=header"
-#     DOCUMENTS = [r"test_files\GFF_sample_context_text_file_2.pdf", r"test_files\GFF_sample_context_text_file.docx"]  # Add your files
+#     DOCUMENTS = [r"test_files\Avula_Puneeth_Kumar_Reddy_resume.pdf"]  # Add your files
+#     # DOCUMENTS = [r"C:\Users\punee\Desktop\Avula_Puneeth_Kumar_Reddy_resume.pdf"]  # Add your files
+#     # DOCUMENTS = [r"test_files\GFF_sample_context_text_file_2.pdf", r"test_files\GFF_sample_context_text_file.docx",]  # Add your files
 
 #     filled_form = rag_pipeline_with_refresh(
 #         FORM_URL, DOCUMENTS,
