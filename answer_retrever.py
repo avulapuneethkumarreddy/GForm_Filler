@@ -101,7 +101,7 @@ def safe_generate_content(model, prompt, safety_settings, retries=3, delay=2):
         except Exception as e:
             print(f"⚠️  Attempt {attempt} failed with error: {e}")
             print("🔁 Retrying...")
-            traceback.print_exc()
+            # traceback.print_exc()
 
         time.sleep(delay + random.uniform(0, 1))
 
@@ -115,6 +115,7 @@ def safe_generate_content(model, prompt, safety_settings, retries=3, delay=2):
 def generate_answers_rag_with_refresh(form_data, vector_store, top_k=3, context_refresh_interval=5):
     """Generates answers for each form question using Gemini RAG."""
     model = genai.GenerativeModel("gemini-2.5-flash")
+    PLACEHOLDER_FLAG = "DATA_NOT_FOUND"
 
     safety_settings = {
         "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
@@ -164,6 +165,7 @@ Options (if any):
 {options_str}
 
 {"Use the following context to answer the question:\n" + context_text if context_text else "No relevant context found."}
+CRITICAL: If you could not answer using context or general_knowledge then return "{PLACEHOLDER_FLAG}" and source "not_found". Never invent personal data.
 
 Generate only the final answer (no explanation).
 """
@@ -177,7 +179,6 @@ Generate only the final answer (no explanation).
         answered.append(q)
 
     return answered
-
 
 # --------------------------------------------------------------------------
 # Safe Question Extraction
@@ -225,20 +226,21 @@ def rag_pipeline_with_refresh(form_url, doc_paths, top_k=3, context_refresh_inte
 
 
 
-if __name__ == "__main__":
-    FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScP8ZvKzWqo496iHhBYp99ygcSEGADD4LOJAaXjspkYvfRBnw/viewform?usp=header"
-    DOCUMENTS = [r"test_files\Avula_Puneeth_Kumar_Reddy_resume.pdf"]  # Add your files
-    # DOCUMENTS = [r"C:\Users\punee\Desktop\Avula_Puneeth_Kumar_Reddy_resume.pdf"]  # Add your files
-    # DOCUMENTS = [r"test_files\GFF_sample_context_text_file_2.pdf", r"test_files\GFF_sample_context_text_file.docx",]  # Add your files
+# if __name__ == "__main__":
+#     FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScP8ZvKzWqo496iHhBYp99ygcSEGADD4LOJAaXjspkYvfRBnw/viewform?usp=header"
+#     DOCUMENTS = [r"test_files\Avula_Puneeth_Kumar_Reddy_resume.pdf"]  # Add your files
+#     # DOCUMENTS = [r"C:\Users\punee\Desktop\Avula_Puneeth_Kumar_Reddy_resume.pdf"]  # Add your files
+#     # DOCUMENTS = [r"test_files\GFF_sample_context_text_file_2.pdf", r"test_files\GFF_sample_context_text_file.docx",]  # Add your files
 
-    filled_form = rag_pipeline_with_refresh(
-        FORM_URL, DOCUMENTS,
-        top_k=3,
-        context_refresh_interval=5  # Refresh context every 5 questions
-    )
+#     filled_form = rag_pipeline_with_refresh(
+#         FORM_URL, DOCUMENTS,
+#         top_k=3,
+#         context_refresh_interval=5  # Refresh context every 5 questions
+#     )
     
-    print("\n--- Final Answers ---")
-    for q in filled_form:
-        print(f"Q: {q['question']}")
-        print(f"A: {q['answer']} (Source: {q['answer_source']})")
-        print("-" * 60)
+#     print("\n--- Final Answers ---")
+#     for q in filled_form:
+#         print(q)
+#         print(f"Q: {q['question']}")
+#         print(f"A: {q['answer']} (Source: {q['answer_source']})")
+#         print("-" * 60)
