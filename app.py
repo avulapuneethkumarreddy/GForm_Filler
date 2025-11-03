@@ -181,9 +181,10 @@ if st.button("🚀 Run Auto-Filler"):
             if save_dir.exists():
                 try:
                     shutil.rmtree(save_dir)
-                    st.info("🧹 Temporary uploaded files deleted successfully.")
+                    # st.info("🧹 Temporary uploaded files deleted successfully.")
                 except Exception as cleanup_error:
-                    st.warning(f"⚠️ Could not delete uploaded files: {cleanup_error}")
+                    # st.warning(f"⚠️ Could not delete uploaded files: {cleanup_error}")
+                    pass
 
 # --- Footer ---
 st.markdown("""
