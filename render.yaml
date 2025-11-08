@@ -3,14 +3,22 @@ services:
     name: gform-filler
     env: python
     plan: free
-    
-    buildpacks: # <-- ADD THIS SECTION
+
+    buildpacks:
       - url: https://github.com/render-examples/chromium-buildpack
 
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt # <-- REMOVED apt-get
-    
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+
     startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
 
     envVars:
       - key: PORT
         value: 8000
+      - key: CHROMIUM_PATH
+        value: /usr/bin/chromium
+      - key: CHROMEDRIVER_PATH
+        value: /usr/bin/chromedriver
+      - key: RENDER
+        value: "true"
