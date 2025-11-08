@@ -3,10 +3,14 @@ services:
     name: gform-filler
     env: python
     plan: free
+
     buildCommand: |
-      apt-get update && apt-get install -y chromium-chromedriver
+      apt-get update && apt-get install -y wget unzip gnupg chromium chromium-driver
+      pip install --upgrade pip
       pip install -r requirements.txt
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+
+    startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
+
     envVars:
       - key: PORT
         value: 8000
