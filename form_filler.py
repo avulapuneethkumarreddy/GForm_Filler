@@ -89,8 +89,12 @@ def get_chrome_driver():
         options.add_argument("--window-size=1920,1080")
 
         # Typical Chrome binary paths for Render / Linux
-        chrome_bin = "/usr/bin/google-chrome"
-        chromedriver_path = "/usr/bin/chromedriver"
+        # chrome_bin = "/usr/bin/google-chrome"
+        # chromedriver_path = "/usr/bin/chromedriver"
+
+        # Use paths from Render's buildpack env vars, with fallbacks
+        chrome_bin = os.environ.get("CHROMIUM_PATH", "/usr/bin/google-chrome")
+        chromedriver_path = os.environ.get("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
 
         if os.path.exists(chrome_bin):
             options.binary_location = chrome_bin
