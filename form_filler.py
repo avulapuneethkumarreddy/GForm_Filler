@@ -9,6 +9,34 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 
+import os
+import subprocess
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+
+def get_driver():
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    if os.getenv("RENDER"):
+        print("🧠 Running on Render — installing Chromium...")
+        subprocess.run(["apt-get", "update"], check=False)
+        subprocess.run(["apt-get", "install", "-y", "chromium", "chromium-driver"], check=False)
+        chrome_path = "/usr/bin/chromium"
+        driver_path = "/usr/bin/chromedriver"
+        options.binary_location = chrome_path
+        return webdriver.Chrome(service=Service(driver_path), options=options)
+    else:
+        print("💻 Running locally — using webdriver-manager")
+        from webdriver_manager.chrome import ChromeDriverManager
+        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+
+driver = get_driver()
+
 # --- Private Helper Functions remain the same ---
 def _handle_short_answer(wait: WebDriverWait, block_xpath: str, answer: str):
     locator = (By.XPATH, f"{block_xpath}//input[@type='text'] | {block_xpath}//textarea")
@@ -166,7 +194,6 @@ if __name__ == "__main__":
 
     # ---  Automatically Fill the Google Form ---
 
-    print("\n🤖 Now launching browser to auto-fill the form...")
     fill_google_form(FORM_URL, filled_form_data)
 
     print("\n🎉 Process complete! The browser window has been left open for your review.")
