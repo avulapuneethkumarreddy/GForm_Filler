@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: gform-filler
+    env: python
+    plan: free
+    buildCommand: |
+      apt-get update && apt-get install -y chromium-chromedriver
+      pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: CHROME_BIN
+        value: /usr/bin/chromium
+      - key: CHROMEDRIVER_PATH
+        value: /usr/bin/chromedriver
